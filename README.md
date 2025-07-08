@@ -52,3 +52,6 @@ This approach ensures that:
 - **Each note** has its own unique salt and nonce.
 - **Passwords** never leave your machine and are never stored in plaintext.
 - **AES‑GCM** protects both confidentiality and integrity of your notes.
+
+
+To run it, it is advisable to place storage.py, crypto.py, main.pyw and icon.ico in one folder, and run main.pyw.
