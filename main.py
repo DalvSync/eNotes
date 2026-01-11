@@ -13,7 +13,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QTimer
 from storage import list_notes, save_note, load_note
 
-CURRENT_VERSION = "1.1"  # Ваша текущая версия
+CURRENT_VERSION = "1.1.1"  # Ваша текущая версия
 
 # Попытка импортировать Pillow — для ресайза/сжатия изображений (опционально)
 try:
