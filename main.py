@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout,
     QListWidget, QTextEdit, QPushButton,
     QInputDialog, QMessageBox, QLineEdit,
-    QFileDialog
+    QFileDialog,QLabel
 )
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QTimer
@@ -33,6 +33,7 @@ class NotesApp(QWidget):
         self.resize(800, 600)
 
         # Виджеты
+        self.label          = QLabel("Ваши заметки")
         self.list           = QListWidget()
         self.text           = QTextEdit()
         self.btn_new        = QPushButton("Новая заметка")
@@ -49,6 +50,7 @@ class NotesApp(QWidget):
 
         # Layout
         left = QVBoxLayout()
+        left.addWidget(self.label)
         left.addWidget(self.list)
         left.addWidget(self.btn_new)
         left.addWidget(self.btn_save)
@@ -79,23 +81,23 @@ class NotesApp(QWidget):
     def show_help(self):
         version = CURRENT_VERSION
         text = (
-            "<b>Как создать новую заметку:</b><br>"
-            "1. Нажмите «Новая заметка».<br>"
-            "2. Введите уникальное имя заметки.<br>"
-            "3. Придумайте и введите пароль — он будет нужен для доступа.<br><br>"
-            "<b>Как открыть или отредактировать заметку:</b><br>"
-            "1. Дважды кликните по имени заметки в списке.<br>"
-            "2. Введите пароль.<br>"
-            "3. При неверном пароле появится ошибка.<br><br>"
-            "<b>Как вставить изображение в заметку:</b><br>"
-            "1. Откройте/создайте заметку.<br>"
-            "2. Нажмите «Прикрепить изображение» и выберите файл.<br>"
-            "3. Изображение вставится в текст в позиции курсора.<br><br>"
-            "<b>Как удалить изображение:</b><br>"
-            "Выделите картинку в тексте и нажмите Delete / Backspace.<br><br>"
-            "<i>Все заметки (включая встраиваемые изображения) хранятся в зашифрованом виде в папке /notes.</i><br><br>"
-            "<i>Ваши данные остаются у вас. Ничего никуда не отправляется. Вы — главный :)</i><br><br>"
-            f"Текущая версия: {version}."
+            f"""<b>Как создать новую заметку:</b><br>
+            1. Нажмите «Новая заметка».<br>
+            2. Введите уникальное имя заметки.<br>
+            3. Придумайте и введите пароль — он будет нужен для доступа.<br><br>
+            <b>Как открыть или отредактировать заметку:</b><br>
+            1. Дважды кликните по имени заметки в списке.<br>
+            2. Введите пароль.<br>
+            3. При неверном пароле появится ошибка.<br><br>
+            <b>Как вставить изображение в заметку:</b><br>
+            1. Откройте/создайте заметку.<br>
+            2. Нажмите «Прикрепить изображение» и выберите файл.<br>
+            3. Изображение вставится в текст в позиции курсора.<br><br>
+            <b>Как удалить изображение:</b><br>
+            Выделите картинку в тексте и нажмите Delete / Backspace.<br><br>
+            <i>Все заметки (включая встраиваемые изображения) хранятся в зашифрованом виде в папке /notes.</i><br><br>
+            <i>Ваши данные остаются у вас. Ничего никуда не отправляется. Вы — главный :)</i><br><br>
+            Текущая версия: {version}."""
         )
         QMessageBox.information(self, "Справка", text)
 
@@ -327,6 +329,7 @@ class NotesApp(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
     win = NotesApp()
     win.show()
     sys.exit(app.exec_())
