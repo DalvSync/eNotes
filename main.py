@@ -13,7 +13,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QTimer
 from storage import list_notes, save_note, load_note
 
-CURRENT_VERSION = "1.1.4"  # Ваша текущая версия
+CURRENT_VERSION = "1.1.5"  # Ваша текущая версия
 
 # Попытка импортировать Pillow — для ресайза/сжатия изображений (опционально)
 try:
@@ -29,7 +29,7 @@ class NotesApp(QWidget):
         icon_path = os.path.join(os.path.dirname(__file__), "icon.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
-        self.setWindowTitle("eNote")
+        self.setWindowTitle(f"eNote v. {CURRENT_VERSION}")
         self.resize(800, 600)
 
         # Виджеты
@@ -41,7 +41,6 @@ class NotesApp(QWidget):
         self.btn_help       = QPushButton("Справка")
         self.btn_update     = QPushButton("Проверить обновления")
         self.btn_change_pwd = QPushButton("Сменить пароль")
-        # Кнопка вставки изображения — теперь вставляет картинку прямо в текст
         self.btn_attach     = QPushButton("Прикрепить изображение")
 
         # Сначала кнопка смены пароля и вставки неактивна
@@ -305,7 +304,7 @@ class NotesApp(QWidget):
     def check_updates(self):
         """Проверка обновлений из главного потока GUI."""
         try:
-            r = requests.get("https://dalvsync.github.io/dalvsyncc.github.io/version.json", timeout=5)
+            r = requests.get("https://dalvsync.github.io/dalvsyncc.github.io/version.json", timeout=30)
             data = r.json()
         except Exception as e:
             print("Ошибка проверки обновлений:", e)
@@ -330,6 +329,11 @@ class NotesApp(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    try:
+        with open("style.qss", "r", encoding="utf-8") as f:
+            app.setStyleSheet(f.read())
+    except FileNotFoundError:
+        print("Файл стилей не найден")
     win = NotesApp()
     win.show()
     sys.exit(app.exec_())
