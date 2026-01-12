@@ -4,7 +4,7 @@ QWidget {
 }
 QPushButton {
 	border: 2px solid #00cc7e; /* Делает рамку цветную */
-	border-radius: 01px; /* Делает закругление */
+	border-radius: 2px; /* Делает закругление */
 }
 QPushButton:hover { /* Эта штука применяется когда наводиться курсор на кнопку */
 	border: 4px solid #00ff9d;
@@ -25,4 +25,7 @@ QPushButton:disabled { /* Это позволяет выделить неакт�
 	background-color: #121212;
 	color: #777777;
 	border: 1px solid #00cc7e;
+}
+#bar {
+    background-color: #121212;
 }
