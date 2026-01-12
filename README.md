@@ -56,4 +56,4 @@ This approach ensures that:
 
 To run it, it is advisable to place storage.py, crypto.py, main.pyw and icon.ico in one folder, and run main.pyw.
 
-requirements: pip install PyQt5 cryptography
+requirements: pip install PyQt5 cryptography Pillow requests
