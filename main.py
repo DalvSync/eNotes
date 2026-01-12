@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
     QFileDialog,QLabel
 )
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer,Qt
 from storage import list_notes, save_note, load_note
 
 CURRENT_VERSION = "1.1.5"  # Ваша текущая версия
@@ -26,7 +26,7 @@ class NotesApp(QWidget):
     def __init__(self):
         super().__init__()
         # Иконка и заголовок
-        icon_path = os.path.join(os.path.dirname(__file__), "icon.ico")
+        icon_path = os.path.join(os.path.dirname(__file__), "icons/icon.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle(f"eNote v. {CURRENT_VERSION}")
@@ -44,7 +44,6 @@ class NotesApp(QWidget):
         self.btn_update     = QPushButton("Проверить обновления")
         self.btn_change_pwd = QPushButton("Сменить пароль")
         self.btn_attach     = QPushButton("Прикрепить изображение")
-        self.btnhelp        = QPushButton("???")
 
         self.buttons = [self.btn_new, self.btn_save, self.btn_help,
                         self.btn_update, self.btn_change_pwd, self.btn_attach]
@@ -66,9 +65,10 @@ class NotesApp(QWidget):
         left.addWidget(self.btn_change_pwd)
         left.addWidget(self.btn_attach)
         left.addWidget(self.btn_update)
-        left.addWidget(self.btn_help)
 
         layout = QHBoxLayout()
+        self.sidebar = Sidebar()
+        layout.addWidget(self.sidebar)
         layout.addLayout(left, 1)
         layout.addWidget(self.text, 3)
         self.setLayout(layout)
@@ -312,7 +312,7 @@ class NotesApp(QWidget):
             return
 
     def check_updates(self):
-        """Проверка обновлений из главного потока GUI."""
+        #Проверка обновлений из главного потока GUI.
         try:
             r = requests.get("https://dalvsync.github.io/dalvsyncc.github.io/version.json", timeout=30)
             data = r.json()
@@ -324,7 +324,7 @@ class NotesApp(QWidget):
         notes          = data.get("notes", "")
         download_url   = data.get("url")
 
-        if remote_version and remote_version != CURRENT_VERSION:
+        if remote_version and remote_version > CURRENT_VERSION:
             msg = (
                 f"Доступна новая версия {remote_version}!\n\n"
                 f"{notes}\n\nСкачать сейчас?"
@@ -335,6 +335,55 @@ class NotesApp(QWidget):
             ) == QMessageBox.Yes:
                 import webbrowser
                 webbrowser.open(download_url)
+
+
+class SettingsWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        icon_path = os.path.join(os.path.dirname(__file__), "icons/icon.ico")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
+        self.setWindowTitle("Настройки eNote")
+        self.resize(400, 350)
+
+        layout = QVBoxLayout() #Это делает так, что б все кнопочки были вертикально созданы (как основные наши кнопки)
+        
+        title = QLabel("Общие настройки")
+        layout.addWidget(title, alignment=Qt.AlignTop)
+        layout.addWidget(title)
+        
+        self.btn_close = QPushButton("Закрыть")
+        self.btn_close.clicked.connect(self.close) #Закрытие окна по нажатию кнопки
+        layout.addWidget(self.btn_close)
+        
+        self.setLayout(layout)
+
+class Sidebar(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.layout = QVBoxLayout()
+        self.layout.setAlignment(Qt.AlignTop) # Отправляет кнопку вверх слайдера 
+        self.setLayout(self.layout)
+        self.btn_home = QPushButton()
+        self.btn_home.setFixedSize(30,30)
+        self.btn_home.setIcon(QIcon("icons/user-icon.ico"))
+        self.layout.addWidget(self.btn_home)
+        self.btn_setings = QPushButton()           #Смотри, эта кнопка будет под первой кнопкой, а если ты создаешь её под self.layout.addStretch(), то она будет внизу.
+        self.btn_setings.setFixedSize(30,30)
+        self.btn_setings.setIcon(QIcon("icons/setings.ico"))
+        self.layout.addWidget(self.btn_setings)
+        self.layout.addStretch()
+
+        self.btn_setings.clicked.connect(self.open_setings)
+
+    def open_setings(self):     
+        if hasattr(self, 'settings_window') and self.settings_window.isVisible(): #Тут короч "защита" от бесконечного открытия окон, ну и само открытие реализовано
+            self.settings_window.raise_()
+            self.settings_window.activateWindow()
+            return
+        
+        self.settings_window = SettingsWindow()
+        self.settings_window.show()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
