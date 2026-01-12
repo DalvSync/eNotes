@@ -1,0 +1,28 @@
+QWidget {
+	background-color: #121212; /* Меняет цвет фона окна */
+	color: #ffffff; /* Меняет цвет текста */
+}
+QPushButton {
+	border: 1px solid #00cc7e; /* Делает рамку цветную */
+	border-radius: 2px; /* Делает закругление */
+}
+QPushButton:hover { /* Эта штука применяется когда наводиться курсор на кнопку */
+	border: 1px solid #00ff9d;
+	border-radius: 2px;
+}
+QListWidget { /* Это отвечает за смену фона списка заметок */
+	border: 1px solid #00cc7e;
+	background-color: #1c1b1b;
+	border-radius: 2px;
+}
+QTextEdit { /* Это отвечает за смену фона поля для редактирования заметок */
+	border: 1px solid #00cc7e;
+	background-color: #1c1b1b;
+	border-radius: 2px;
+	margin-top: 19px; /* Я сделал отступ, шоб в будущем сделали типо кнопочку аккаунтов, на будущее заготовка */
+}
+QPushButton:disabled { /* Это позволяет выделить неактивные кнопки */
+	background-color: #121212;
+	color: #777777;
+	border: 2px solid #00cc7e;
+}
