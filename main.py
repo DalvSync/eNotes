@@ -44,6 +44,7 @@ class NotesApp(QWidget):
         self.btn_update     = QPushButton("Проверить обновления")
         self.btn_change_pwd = QPushButton("Сменить пароль")
         self.btn_attach     = QPushButton("Прикрепить изображение")
+        self.btnhelp        = QPushButton("???")
 
         self.buttons = [self.btn_new, self.btn_save, self.btn_help,
                         self.btn_update, self.btn_change_pwd, self.btn_attach]
