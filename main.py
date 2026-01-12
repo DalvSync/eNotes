@@ -34,14 +34,23 @@ class NotesApp(QWidget):
 
         # Виджеты
         self.label          = QLabel("Ваши заметки")
+
         self.list           = QListWidget()
         self.text           = QTextEdit()
+        
         self.btn_new        = QPushButton("Новая заметка")
         self.btn_save       = QPushButton("Сохранить")
         self.btn_help       = QPushButton("Справка")
         self.btn_update     = QPushButton("Проверить обновления")
         self.btn_change_pwd = QPushButton("Сменить пароль")
         self.btn_attach     = QPushButton("Прикрепить изображение")
+
+        self.buttons = [self.btn_new, self.btn_save, self.btn_help,
+                        self.btn_update, self.btn_change_pwd, self.btn_attach]
+        
+        for b in self.buttons:
+            b.setFixedHeight(30)
+
 
         # Сначала кнопка смены пароля и вставки неактивна
         self.btn_change_pwd.setEnabled(False)
@@ -328,7 +337,6 @@ class NotesApp(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")
     try:
         with open("style.qss", "r", encoding="utf-8") as f:
             app.setStyleSheet(f.read())
