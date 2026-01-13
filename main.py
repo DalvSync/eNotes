@@ -64,7 +64,7 @@ from PyQt5.QtWidgets import (
     QFileDialog,QLabel
 )
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QTimer,Qt
+from PyQt5.QtCore import QTimer,Qt,QSize
 from storage import list_notes, save_note, load_note
 
 CURRENT_VERSION = "1.1.5"  # Ваша текущая версия
@@ -403,13 +403,14 @@ class Sidebar(QWidget):
 
 
         self.btn_home = QPushButton()
-        self.btn_setings = QPushButton()           #Смотри, эта кнопка будет под первой кнопкой, а если ты создаешь её под self.layout.addStretch(), то она будет внизу.
+        self.btn_setings = QPushButton() #Смотри, эта кнопка будет под первой кнопкой, а если ты создаешь её под self.layout.addStretch(), то она будет внизу.
         self.btn_help = QPushButton()
 
 
         self.btn_home.setIcon(QIcon("icons/user-icon.ico"))
         self.btn_setings.setIcon(QIcon("icons/setings.ico"))
         self.btn_help.setIcon(QIcon("icons/help.ico"))
+        self.btn_help.setIconSize(QSize(25, 25)) #Меняет размер картинки внутри кнопки
 
         self.buttons = [self.btn_home, self.btn_setings, self.btn_help]  #Сюда добавлять будущие кнопки для сайдбара
         
@@ -437,7 +438,7 @@ class Sidebar(QWidget):
         self.settings_window = SettingsWindow()
         self.settings_window.show()
     def open_help(self):     
-        if hasattr(self, 'help_window') and self.help_window.isVisible(): #Тут короч "защита" от бесконечного открытия окон, ну и само открытие реализовано
+        if hasattr(self, 'help_window') and self.help_window.isVisible():
             self.help_window.raise_()
             self.help_window.activateWindow()
             return
@@ -463,7 +464,7 @@ class SettingsWindow(QWidget):
         self.setLayout(layout)
         self.buttons = [self.btn_close]
         for b in self.buttons:
-            b.setFixedSize(30,30)
+            b.setFixedHeight(30)
 
 class HelpWindow(QWidget):
     def __init__(self):
@@ -475,6 +476,20 @@ class HelpWindow(QWidget):
         self.resize(400, 350)
 
         layout = QVBoxLayout() #Это делает так, что б все кнопочки были вертикально созданы (как основные наши кнопки)
+
+        self.btn_q1 = QPushButton("Как создать заметку?")
+        self.btn_q1.clicked.connect(self.q1_r)
+        layout.addWidget(self.btn_q1)
+        self.btn_q2 = QPushButton("Как открыть или отредактировать заметку?")
+        self.btn_q2.clicked.connect(self.q2_r)
+        layout.addWidget(self.btn_q2)
+        self.btn_q3 = QPushButton("Как вставить изображение в заметку?")
+        self.btn_q3.clicked.connect(self.q3_r)
+        layout.addWidget(self.btn_q3)
+        self.btn_q4 = QPushButton("Как удалить изображение?")
+        self.btn_q4.clicked.connect(self.q4_r)
+        layout.addWidget(self.btn_q4)
+
         layout.addStretch()
         self.btn_close = QPushButton("Закрыть")
         self.btn_close.clicked.connect(self.close) #Закрытие окна по нажатию кнопки
@@ -483,8 +498,39 @@ class HelpWindow(QWidget):
         self.buttons = [self.btn_close]
         for b in self.buttons:
             b.setFixedHeight(30)
+
+        self.buttons = [self.btn_q1,self.btn_q2,self.btn_q3,self.btn_q4]
+        for b in self.buttons:
+            b.setFixedHeight(20)
         
         self.setLayout(layout)
+
+    def q1_r(self):
+        text = ( """
+            1. Нажмите «Новая заметка».<br>
+            2. Введите уникальное имя заметки.<br>
+            3. Придумайте и введите пароль — он будет нужен для доступа. """
+        )
+        QMessageBox.information(self, "Как создать заметку?", text)
+    def q2_r(self):
+        text = ( """
+            1. Дважды кликните по имени заметки в списке.
+            2. Введите пароль.
+            3. При неверном пароле появится ошибка. """
+        )
+        QMessageBox.information(self, "Как открыть или отредактировать заметку?", text)
+    def q3_r(self):
+        text = ( """
+            1. Откройте/создайте заметку.<br>
+            2. Нажмите «Прикрепить изображение» и выберите файл.<br>
+            3. Изображение вставится в текст в позиции курсора. """
+        )
+        QMessageBox.information(self, "Как вставить изображение в заметку?", text)
+    def q4_r(self):
+        text = ( """
+            Выделите картинку в тексте и нажмите Delete / Backspace. """
+        )
+        QMessageBox.information(self, "Как удалить изображение?", text)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
