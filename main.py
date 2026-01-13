@@ -1,3 +1,57 @@
+"""                                                                                                                                                                                               
+             +#++                                                                  =*#*=            
+          %@@@@@@@@@@%                                                        %@@@@@@@@@@#          
+         *@@@@%%%@@@@@@@@*                                                *@@@@@@@@%##@@@@+         
+        -@@@@        %@@@@@@=                                          +@@@@@@@        %@@@-        
+        #@@@           *@@@@@@%                                      @@@@@@@+           @@@#        
+        @@@#    @@@#      @@@@@@@*       +#@#%%@@@@@@%%#@%*       *@@@@@@@      #@@@    #@@@        
+        @@@+   =@@@@@@:     %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%     =@@@@@@@   *@@@        
+        *@@%   +@@@@@@@@%     @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@     %@@@@@@@@@   @@@%        
+        +@@@   #@@@@@%*      =@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+      *%@@@@@#   @@@=        
+         @@@%   @@@@@@@@@= @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ =@@@@@@@@@   %@@@         
+          @@@   +@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@-   @@@          
+          %@@%   #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%   %@@%          
+           @@@%   %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#   %@@@           
+           :@@@#  =@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+  %@@@            
+            %@@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%@@@#            
+             +@@@@@@@@@@@@@@@@@@##        @@@@@@@@@@@@@@@%        ##@@@@@@@@@@@@@@@@@@*             
+             %@@@@@@@@@@@@@@@-             -@@@@@@@@@@@@              -@@@@@@@@@@@@@@@%             
+            %@@@@@@@@@@@@%                  #@@@@@@@@@@%                  %@@@@@@@@@@@@%            
+           @@@@@@@@@@@*                      @@@@@@@@@@                      *@@@@@@@@@@@           
+         :@@@@@@@@@%                         @@@@@@@@@%                         %@@@@@@@@@          
+        #@@@@@@@*              *@@@@@@@#     *@@@@@@@@=     #@@@@@@@*              *@@@@@@@#        
+       @@@@@@#              @@@@@@@@@@@@@@   *@@@@@@@@+   @@@@@@@@@@@@@@              #@@@@@@       
+     @@@@@               %@@@@@@@%%%@@@@@@@% %@@@@@@@@# %@@@@@@@%@%@@@@@@@%               @@@@@     
+   @@%                +@@@@@@@%       .@@@@@@@@@@@@@@@@%@@@@@-   =-  %@@@@@@@*                %@%   
+ =                  @@@@@@@@@#        . @@@@@@@@@@@@@@@@@@@@          %@@@@@@@@@                  +.
+                 *@@@@@@@@@@@           %@@@@@@@@@@@@@@@@@@#           @@@@@@@@@@@*                 
+               #@@@@@@@@@@@@@-          @@@@@@@@@@@@@@@@@@@@          =@@@@@@@@@@@@@#               
+             @@@@@@@@@@@@@@@@@%        @@@@@@@@@@@@@@@@@@@@@@        *@@@@@@@@@@@@@@@@@             
+          +@@@@@@@@@@@@@@@@@@@@@%+::#@@@@@@@@@@@@@@@@@@@@@@@@@@*:.=%@@@@@@@@@@@@@@@@@@@@@*          
+        +@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=-@@@@@@@@ -@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@         
+         #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+    @@@@@@@@    =@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*         
+           *@@@@@@@@@@@@@@@@@@@@@@@@@@%       @@@@@@@@       %@@@@@@@@@@@@@@@@@@@@@@@@@@+           
+              @@@@@@@@@@@@@@@@@@@@@@#         @@@@@@@@         %@@@@@@@@@@@@@@@@@@@@@@              
+                #@@@@@@@@@@@@@@@@@@+                            +@@@@@@@@@@@@@@@@@@#                
+                   @@@@@@@@@@@@@@@           #%@@@@@@%%           @@@@@@@@@@@@@@%                   
+                      *@@@@@@@@@@          @@@@@@@@@@@@@@          @@@@@@@@@@*                      
+                         +#@@@@@          #@@@@@@@@@@@@@@*         =@@@@@%=                         
+                              +@           @@@@@@@@@@@@@@           %=                              
+                                            @@@@@@@@@@@@                                            
+                                              +%@@@@%*                                              
+                                                @@@@                                                
+                                         :@@@@@@@@@@@@@@@@:                                         
+                                             =@%%@@@%%-                                    
+                                        _______          __           
+                                  ____  \      \   _____/  |_  ____   
+                                _/ __ \ /   |   \ /  _ \   __\/ __ \  
+                               \  ___//     |    ( <_> )  | \   ___/  
+                                \___  >____|__  /\____/|__|  \___  > 
+                                    \/        \/                 \/                                               
+ 
+"""
+
+
 import sys
 import os
 import requests
@@ -15,6 +69,17 @@ from storage import list_notes, save_note, load_note
 
 CURRENT_VERSION = "1.1.5"  # Ваша текущая версия
 
+# Функция проверки на обновления
+try:
+     r = requests.get("https://dalvsync.github.io/dalvsyncc.github.io/version.json", timeout=30)
+     data = r.json()
+except Exception as e:
+    print("Ошибка проверки обновлений:", e)
+
+remote_version = data.get("version")
+notes          = data.get("notes", "")
+download_url   = data.get("url")
+
 # Попытка импортировать Pillow — для ресайза/сжатия изображений (опционально)
 try:
     from PIL import Image
@@ -24,7 +89,7 @@ except Exception:
 
 class NotesApp(QWidget):
     def __init__(self):
-        super().__init__()
+        super().__init__() 
         # Иконка и заголовок
         icon_path = os.path.join(os.path.dirname(__file__), "icons/icon.ico")
         if os.path.exists(icon_path):
@@ -49,7 +114,7 @@ class NotesApp(QWidget):
                         self.btn_update, self.btn_change_pwd, self.btn_attach]
         
         for b in self.buttons:
-            b.setFixedHeight(30)
+            b.setFixedHeight(30) 
 
 
         # Сначала кнопка смены пароля и вставки неактивна
@@ -79,6 +144,7 @@ class NotesApp(QWidget):
         self.list.itemDoubleClicked.connect(self.open_note)
         self.btn_help.clicked.connect(self.show_help)
         self.btn_update.clicked.connect(self.check_updates)
+        self.btn_update.clicked.connect(self.no_updates)
         self.btn_change_pwd.clicked.connect(self.change_password)
         self.btn_attach.clicked.connect(self.insert_image_inline)
 
@@ -313,16 +379,6 @@ class NotesApp(QWidget):
 
     def check_updates(self):
         #Проверка обновлений из главного потока GUI.
-        try:
-            r = requests.get("https://dalvsync.github.io/dalvsyncc.github.io/version.json", timeout=30)
-            data = r.json()
-        except Exception as e:
-            print("Ошибка проверки обновлений:", e)
-            return
-
-        remote_version = data.get("version")
-        notes          = data.get("notes", "")
-        download_url   = data.get("url")
 
         if remote_version and remote_version > CURRENT_VERSION:
             msg = (
@@ -335,6 +391,13 @@ class NotesApp(QWidget):
             ) == QMessageBox.Yes:
                 import webbrowser
                 webbrowser.open(download_url)
+    
+    def no_updates(self):
+        # Сообщение, если нет обновлений
+        if remote_version and remote_version == CURRENT_VERSION:
+            QMessageBox.information(self, "Обновлений нет", "У вас установлена последняя версия")
+        
+    
 
 
 class SettingsWindow(QWidget):
@@ -361,16 +424,25 @@ class SettingsWindow(QWidget):
 class Sidebar(QWidget):
     def __init__(self):
         super().__init__()
-        self.layout = QVBoxLayout()
-        self.layout.setAlignment(Qt.AlignTop) # Отправляет кнопку вверх слайдера 
-        self.setLayout(self.layout)
+
+
         self.btn_home = QPushButton()
-        self.btn_home.setFixedSize(30,30)
-        self.btn_home.setIcon(QIcon("icons/user-icon.ico"))
-        self.layout.addWidget(self.btn_home)
         self.btn_setings = QPushButton()           #Смотри, эта кнопка будет под первой кнопкой, а если ты создаешь её под self.layout.addStretch(), то она будет внизу.
-        self.btn_setings.setFixedSize(30,30)
+
+
+        self.btn_home.setIcon(QIcon("icons/user-icon.ico"))
         self.btn_setings.setIcon(QIcon("icons/setings.ico"))
+
+        self.buttons = [self.btn_home, self.btn_setings]  #Сюда добавлять будущие кнопки для сайдбара
+        
+        for b in self.buttons:
+            b.setFixedSize(30,30) 
+
+
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
+        self.layout.setAlignment(Qt.AlignTop) # Отправляет кнопку вверх слайдера  
+        self.layout.addWidget(self.btn_home)
         self.layout.addWidget(self.btn_setings)
         self.layout.addStretch()
 
