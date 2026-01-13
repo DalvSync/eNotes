@@ -73,12 +73,14 @@ CURRENT_VERSION = "1.1.5"  # Ваша текущая версия
 try:
      r = requests.get("https://dalvsync.github.io/dalvsyncc.github.io/version.json", timeout=30)
      data = r.json()
-except Exception as e:
-    print("Ошибка проверки обновлений:", e)
+     remote_version = data.get("version")
+     notes          = data.get("notes", "")
+     download_url   = data.get("url")
+except Exception:
+    print("Ошибка проверки обновлений:")
+    remote_version = CURRENT_VERSION
 
-remote_version = data.get("version")
-notes          = data.get("notes", "")
-download_url   = data.get("url")
+
 
 # Попытка импортировать Pillow — для ресайза/сжатия изображений (опционально)
 try:
