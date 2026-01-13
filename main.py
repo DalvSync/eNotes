@@ -396,30 +396,6 @@ class NotesApp(QWidget):
         # Сообщение, если нет обновлений
         if remote_version and remote_version == CURRENT_VERSION:
             QMessageBox.information(self, "Обновлений нет", "У вас установлена последняя версия")
-        
-    
-
-
-class SettingsWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        icon_path = os.path.join(os.path.dirname(__file__), "icons/icon.ico")
-        if os.path.exists(icon_path):
-            self.setWindowIcon(QIcon(icon_path))
-        self.setWindowTitle("Настройки eNote")
-        self.resize(400, 350)
-
-        layout = QVBoxLayout() #Это делает так, что б все кнопочки были вертикально созданы (как основные наши кнопки)
-        
-        title = QLabel("Общие настройки")
-        layout.addWidget(title, alignment=Qt.AlignTop)
-        layout.addWidget(title)
-        
-        self.btn_close = QPushButton("Закрыть")
-        self.btn_close.clicked.connect(self.close) #Закрытие окна по нажатию кнопки
-        layout.addWidget(self.btn_close)
-        
-        self.setLayout(layout)
 
 class Sidebar(QWidget):
     def __init__(self):
@@ -428,12 +404,14 @@ class Sidebar(QWidget):
 
         self.btn_home = QPushButton()
         self.btn_setings = QPushButton()           #Смотри, эта кнопка будет под первой кнопкой, а если ты создаешь её под self.layout.addStretch(), то она будет внизу.
+        self.btn_help = QPushButton()
 
 
         self.btn_home.setIcon(QIcon("icons/user-icon.ico"))
         self.btn_setings.setIcon(QIcon("icons/setings.ico"))
+        self.btn_help.setIcon(QIcon("icons/help.ico"))
 
-        self.buttons = [self.btn_home, self.btn_setings]  #Сюда добавлять будущие кнопки для сайдбара
+        self.buttons = [self.btn_home, self.btn_setings, self.btn_help]  #Сюда добавлять будущие кнопки для сайдбара
         
         for b in self.buttons:
             b.setFixedSize(30,30) 
@@ -441,12 +419,14 @@ class Sidebar(QWidget):
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
-        self.layout.setAlignment(Qt.AlignTop) # Отправляет кнопку вверх слайдера  
+        #self.layout.setAlignment(Qt.AlignTop) # Отправляет кнопку вверх слайдера  
         self.layout.addWidget(self.btn_home)
         self.layout.addWidget(self.btn_setings)
         self.layout.addStretch()
+        self.layout.addWidget(self.btn_help)
 
         self.btn_setings.clicked.connect(self.open_setings)
+        self.btn_help.clicked.connect(self.open_help)
 
     def open_setings(self):     
         if hasattr(self, 'settings_window') and self.settings_window.isVisible(): #Тут короч "защита" от бесконечного открытия окон, ну и само открытие реализовано
@@ -456,6 +436,55 @@ class Sidebar(QWidget):
         
         self.settings_window = SettingsWindow()
         self.settings_window.show()
+    def open_help(self):     
+        if hasattr(self, 'help_window') and self.help_window.isVisible(): #Тут короч "защита" от бесконечного открытия окон, ну и само открытие реализовано
+            self.help_window.raise_()
+            self.help_window.activateWindow()
+            return
+        
+        self.help_window = HelpWindow()
+        self.help_window.show()
+
+class SettingsWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        icon_path = os.path.join(os.path.dirname(__file__), "icons/icon.ico")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
+        self.setWindowTitle("Настройки")
+        self.resize(400, 350)
+
+        layout = QVBoxLayout() #Это делает так, что б все кнопочки были вертикально созданы (как основные наши кнопки)
+        layout.addStretch()
+        self.btn_close = QPushButton("Закрыть")
+        self.btn_close.clicked.connect(self.close) #Закрытие окна по нажатию кнопки
+        layout.addWidget(self.btn_close)
+        
+        self.setLayout(layout)
+        self.buttons = [self.btn_close]
+        for b in self.buttons:
+            b.setFixedSize(30,30)
+
+class HelpWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        icon_path = os.path.join(os.path.dirname(__file__), "icons/icon.ico")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
+        self.setWindowTitle("Справка и помощь")
+        self.resize(400, 350)
+
+        layout = QVBoxLayout() #Это делает так, что б все кнопочки были вертикально созданы (как основные наши кнопки)
+        layout.addStretch()
+        self.btn_close = QPushButton("Закрыть")
+        self.btn_close.clicked.connect(self.close) #Закрытие окна по нажатию кнопки
+        layout.addWidget(self.btn_close)
+
+        self.buttons = [self.btn_close]
+        for b in self.buttons:
+            b.setFixedHeight(30)
+        
+        self.setLayout(layout)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
