@@ -57,11 +57,12 @@ import os
 import requests
 import base64
 import io
+import json
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QHBoxLayout, QVBoxLayout,
     QListWidget, QTextEdit, QPushButton,
     QInputDialog, QMessageBox, QLineEdit,
-    QFileDialog,QLabel,
+    QFileDialog,QLabel,QGroupBox,QComboBox
 )
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QTimer,Qt,QSize
@@ -69,6 +70,60 @@ from PyQt5.QtCore import QTimer,Qt,QSize
 from storage import list_notes, save_note, load_note
 
 CURRENT_VERSION = "1.1.5"  # Ваша текущая версия
+
+class ConfigManager:
+    SETTINGS_FILE = "settings.json"
+    LANG_FOLDER = "langs"
+    
+    def __init__(self):
+        self.config = {"language": "eng"} #Тут мова за замовчуванням вибирається
+        self.load_settings()
+
+        self.translations = {} 
+        self.load_translation_file() #Скачуємо словник перекладів з файлу
+
+    def load_settings(self):
+        if os.path.exists(self.SETTINGS_FILE):
+            try:
+                with open(self.SETTINGS_FILE, "r", encoding="utf-8") as f:
+                    self.config = json.load(f)
+            except Exception:
+                pass 
+
+    def save_settings(self):
+        with open(self.SETTINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump(self.config, f)
+
+    def get_lang(self):
+        return self.config.get("language", "ua")
+
+    def set_lang(self, lang_code):
+        self.config["language"] = lang_code
+        self.save_settings()
+        self.load_translation_file()
+
+    def load_translation_file(self):
+        lang = self.get_lang()
+        path = os.path.join(os.path.dirname(__file__), self.LANG_FOLDER, f"{lang}.json")
+        
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    self.translations = json.load(f)
+            except Exception as e:
+                print(f"Помилка завантаження мови {lang}: {e}")
+                self.translations = {}
+        else:
+            print(f"Файл мови не знайдено: {path}")
+            self.translations = {}
+
+    def get_text(self, key):
+        return self.translations.get(key, key)
+
+cfg = ConfigManager()
+
+def tr(key):
+    return cfg.get_text(key)
 
 # Функция проверки на обновления
 try:
@@ -78,7 +133,7 @@ try:
      notes          = data.get("notes", "")
      download_url   = data.get("url")
 except Exception:
-    print("Ошибка проверки обновлений:")
+    print(tr("error_chk_v"))
     remote_version = CURRENT_VERSION
 
 
@@ -93,7 +148,6 @@ except Exception:
 class NotesApp(QWidget):
     def __init__(self):
         super().__init__() 
-        # Иконка и заголовок
         icon_path = os.path.join(os.path.dirname(__file__), "icons/icon.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
@@ -101,25 +155,22 @@ class NotesApp(QWidget):
         self.resize(800, 600)
 
         # Виджеты
-        self.label          = QLabel("Ваши заметки")
+        self.label          = QLabel(tr("lbl_your_notes"))
 
         self.list           = QListWidget()
         self.text           = QTextEdit()
         
-        self.btn_new        = QPushButton("Новая заметка")
-        self.btn_save       = QPushButton("Сохранить")
-        self.btn_help       = QPushButton("Справка")
-        self.btn_update     = QPushButton("Проверить обновления")
-        self.btn_change_pwd = QPushButton("Сменить пароль")
-        self.btn_attach     = QPushButton("Прикрепить изображение")
+        self.btn_new        = QPushButton(tr("btn_new"))
+        self.btn_save       = QPushButton(tr("btn_save"))
+        self.btn_update     = QPushButton(tr("btn_update"))
+        self.btn_change_pwd = QPushButton(tr("btn_change_pwd"))
+        self.btn_attach     = QPushButton(tr("btn_attach"))
 
-        self.buttons = [self.btn_new, self.btn_save, self.btn_help,
+        self.buttons = [self.btn_new, self.btn_save,
                         self.btn_update, self.btn_change_pwd, self.btn_attach]
         
         for b in self.buttons:
             b.setFixedHeight(30) 
-
-
         # Сначала кнопка смены пароля и вставки неактивна
         self.btn_change_pwd.setEnabled(False)
         self.btn_attach.setEnabled(False)
@@ -145,7 +196,6 @@ class NotesApp(QWidget):
         self.btn_new.clicked.connect(self.create_note)
         self.btn_save.clicked.connect(self.save_current)
         self.list.itemDoubleClicked.connect(self.open_note)
-        self.btn_help.clicked.connect(self.show_help)
         self.btn_update.clicked.connect(self.check_updates)
         self.btn_update.clicked.connect(self.no_updates)
         self.btn_change_pwd.clicked.connect(self.change_password)
@@ -156,41 +206,18 @@ class NotesApp(QWidget):
         # Проверка обновлений сразу после показа окна
         QTimer.singleShot(0, self.check_updates)
 
-    def show_help(self):
-        version = CURRENT_VERSION
-        text = (
-            f"""<b>Как создать новую заметку:</b><br>
-            1. Нажмите «Новая заметка».<br>
-            2. Введите уникальное имя заметки.<br>
-            3. Придумайте и введите пароль — он будет нужен для доступа.<br><br>
-            <b>Как открыть или отредактировать заметку:</b><br>
-            1. Дважды кликните по имени заметки в списке.<br>
-            2. Введите пароль.<br>
-            3. При неверном пароле появится ошибка.<br><br>
-            <b>Как вставить изображение в заметку:</b><br>
-            1. Откройте/создайте заметку.<br>
-            2. Нажмите «Прикрепить изображение» и выберите файл.<br>
-            3. Изображение вставится в текст в позиции курсора.<br><br>
-            <b>Как удалить изображение:</b><br>
-            Выделите картинку в тексте и нажмите Delete / Backspace.<br><br>
-            <i>Все заметки (включая встраиваемые изображения) хранятся в зашифрованом виде в папке /notes.</i><br><br>
-            <i>Ваши данные остаются у вас. Ничего никуда не отправляется. Вы — главный :)</i><br><br>
-            Текущая версия: {version}."""
-        )
-        QMessageBox.information(self, "Справка", text)
-
     def refresh_list(self):
         self.list.clear()
         for name in list_notes():
             self.list.addItem(name)
 
     def create_note(self):
-        name, ok = QInputDialog.getText(self, "Новая заметка", "Название:")
+        name, ok = QInputDialog.getText(self, tr("btn_new"), tr("input_new_name"))
         if not ok or not name.strip():
             return
 
         pwd, ok = QInputDialog.getText(
-            self, "Пароль", f"Пароль для «{name}»:",
+            self, tr("title_pwd"), tr(f"input_new_pwd"),
             echo=QLineEdit.Password
         )
         if not ok:
@@ -200,16 +227,16 @@ class NotesApp(QWidget):
             # Сохраняем пустую заметку как пустой HTML документ
             save_note(name, "<html><body></body></html>", pwd)
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось создать заметку:\n{e}")
+            QMessageBox.critical(self, tr("title_error"), tr(f"err_create_note"))
             return
 
-        QMessageBox.information(self, "Готово", f"Заметка «{name}» создана.")
+        QMessageBox.information(self, tr("title_done"), tr(f"msg_note_created"))
         self.refresh_list()
 
     def open_note(self, item):
         name = item.text()
         pwd, ok = QInputDialog.getText(
-            self, "Пароль", f"Пароль для «{name}»:",
+            self, tr("title_pwd"), tr(f"input_pwd"),
             echo=QLineEdit.Password
         )
         if not ok:
@@ -217,7 +244,7 @@ class NotesApp(QWidget):
         try:
             content = load_note(name, pwd)  # возвращает str (html или plain)
         except Exception:
-            QMessageBox.critical(self, "Ошибка", "Неверный пароль или повреждённый файл.")
+            QMessageBox.critical(self, tr("title_error"), tr("err_wrong_pwd"))
             return
 
         self.current_name = name
@@ -235,7 +262,7 @@ class NotesApp(QWidget):
 
     def save_current(self):
         if not hasattr(self, 'current_name'):
-            QMessageBox.warning(self, "Внимание", "Сначала откройте или создайте заметку.")
+            QMessageBox.warning(self, tr("title_warning"), tr("warn_open_first"))
             return
 
         # сохраняем HTML содержимое (включая <img src="data:...">)
@@ -243,15 +270,15 @@ class NotesApp(QWidget):
         try:
             save_note(self.current_name, content_html, self.current_pwd)
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось сохранить заметку:\n{e}")
+            QMessageBox.critical(self, tr("title_error"), tr(f"err_save"))
             return
 
-        QMessageBox.information(self, "Сохранено", f"Заметка «{self.current_name}» сохранена.")
+        QMessageBox.information(self, tr("title_save_note"), tr(f"msg_note_saved"))
 
     def change_password(self):
         old_pwd, ok = QInputDialog.getText(
-            self, "Старый пароль",
-            f"Введите текущий пароль для «{self.current_name}»:",
+            self, tr("title_old_pwd"),
+            tr(f"input_old_pwd"),
             echo=QLineEdit.Password
         )
         if not ok:
@@ -259,23 +286,23 @@ class NotesApp(QWidget):
         try:
             content = load_note(self.current_name, old_pwd)
         except Exception:
-            QMessageBox.critical(self, "Ошибка", "Неверный старый пароль.")
+            QMessageBox.critical(self, tr("title_error"), tr("err_old_pwd"))
             return
 
         new1, ok1 = QInputDialog.getText(
-            self, "Новый пароль", "Введите новый пароль:",
+            self, tr("title_new_pwd_win"), tr("input_new_pwd"),
             echo=QLineEdit.Password
         )
         if not ok1:
             return
         new2, ok2 = QInputDialog.getText(
-            self, "Новый пароль", "Повторите новый пароль:",
+            self, tr("title_new_pwd_win"), tr("input_repeat_pwd"),
             echo=QLineEdit.Password
         )
         if not ok2:
             return
         if new1 != new2:
-            QMessageBox.warning(self, "Ошибка", "Пароли не совпадают.")
+            QMessageBox.warning(self, tr("title_error"), tr("err_pwd_mismatch"))
             return
 
         try:
@@ -283,19 +310,19 @@ class NotesApp(QWidget):
             # content — это HTML (строка)
             save_note(self.current_name, content, new1)
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось сменить пароль:\n{e}")
+            QMessageBox.critical(self, tr("title_error"), tr(f"err_change_pwd"))
             return
 
         self.current_pwd = new1
-        QMessageBox.information(self, "Готово", "Пароль успешно изменён.")
+        QMessageBox.information(self, tr("title_done"), tr("msg_pwd_changed"))
 
     def insert_image_inline(self):
         """Вставляет изображение в позицию курсора как data:image/...;base64,..."""
         if not hasattr(self, 'current_name'):
-            QMessageBox.warning(self, "Внимание", "Откройте заметку перед вставкой изображения.")
+            QMessageBox.warning(self, tr("title_warning"), tr("warn_open_first"))
             return
 
-        path, _ = QFileDialog.getOpenFileName(self, "Выберите изображение", filter="Images (*.png *.jpg *.jpeg *.bmp *.gif);;All Files (*)")
+        path, _ = QFileDialog.getOpenFileName(self, tr("title_img"), filter="Images (*.png *.jpg *.jpeg *.bmp *.gif);;All Files (*)")
         if not path:
             return
 
@@ -377,7 +404,7 @@ class NotesApp(QWidget):
             img_html = f'<img src="{data_uri}" style="max-width:100%;"/><br/>'
             cursor.insertHtml(img_html)
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось вставить изображение:\n{e}")
+            QMessageBox.critical(self, tr("title_error"), tr(f"err_insert_img"))
             return
 
     def check_updates(self):
@@ -385,11 +412,10 @@ class NotesApp(QWidget):
 
         if remote_version and remote_version > CURRENT_VERSION:
             msg = (
-                f"Доступна новая версия {remote_version}!\n\n"
-                f"{notes}\n\nСкачать сейчас?"
+                tr(f"msg_update_avail")
             )
             if QMessageBox.question(
-                self, "Обновление доступно", msg,
+                self, tr("title_update"), msg,
                 QMessageBox.Yes | QMessageBox.No
             ) == QMessageBox.Yes:
                 import webbrowser
@@ -398,7 +424,7 @@ class NotesApp(QWidget):
     def no_updates(self):
         # Сообщение, если нет обновлений
         if remote_version and remote_version == CURRENT_VERSION:
-            QMessageBox.information(self, "Обновлений нет", "У вас установлена последняя версия")
+            QMessageBox.information(self, tr("title_upd_n"), tr("upd_lst"))
 
 class Sidebar(QWidget):
     def __init__(self):
@@ -407,14 +433,12 @@ class Sidebar(QWidget):
 
         self.btn_home = QPushButton()
         self.btn_setings = QPushButton() #Смотри, эта кнопка будет под первой кнопкой, а если ты создаешь её под self.layout.addStretch(), то она будет внизу.
-        self.btn_setings = QPushButton() #Смотри, эта кнопка будет под первой кнопкой, а если ты создаешь её под self.layout.addStretch(), то она будет внизу.
         self.btn_help = QPushButton()
 
 
         self.btn_home.setIcon(QIcon("icons/user-icon.ico"))
         self.btn_setings.setIcon(QIcon("icons/setings.ico"))
         self.btn_help.setIcon(QIcon("icons/help.ico"))
-        self.btn_help.setIconSize(QSize(25, 25)) #Меняет размер картинки внутри кнопки
         self.btn_help.setIconSize(QSize(25, 25)) #Меняет размер картинки внутри кнопки
 
         self.buttons = [self.btn_home, self.btn_setings, self.btn_help]  #Сюда добавлять будущие кнопки для сайдбара
@@ -456,12 +480,29 @@ class SettingsWindow(QWidget):
         icon_path = os.path.join(os.path.dirname(__file__), "icons/icon.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
-        self.setWindowTitle("Настройки")
+        self.setWindowTitle(tr("btn_settings"))
         self.resize(400, 350)
 
         layout = QVBoxLayout() #Это делает так, что б все кнопочки были вертикально созданы (как основные наши кнопки)
+        lang_group = QGroupBox(tr("settings_lang")) #Воно створює "коробочку"
+        lang_layout = QVBoxLayout()
+        
+        self.combo_lang = QComboBox() #Воно створює списочєк
+        self.combo_lang.addItem("Українська", "ua")
+        self.combo_lang.addItem("English", "eng")
+        
+        current = cfg.get_lang() #Це вибір мови
+        index = self.combo_lang.findData(current)
+        if index >= 0:
+            self.combo_lang.setCurrentIndex(index)
+
+        self.combo_lang.currentIndexChanged.connect(self.change_language)
+        
+        lang_layout.addWidget(self.combo_lang)
+        lang_group.setLayout(lang_layout)
+        layout.addWidget(lang_group)
         layout.addStretch()
-        self.btn_close = QPushButton("Закрыть")
+        self.btn_close = QPushButton(tr("btn_close"))
         self.btn_close.clicked.connect(self.close) #Закрытие окна по нажатию кнопки
         layout.addWidget(self.btn_close)
         
@@ -471,46 +512,36 @@ class SettingsWindow(QWidget):
             b.setFixedHeight(30)
             b.setFixedHeight(30)
 
+    def change_language(self, index):
+        lang_code = self.combo_lang.itemData(index)
+        cfg.set_lang(lang_code)
+
 class HelpWindow(QWidget):
     def __init__(self):
         super().__init__()
         icon_path = os.path.join(os.path.dirname(__file__), "icons/icon.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
-        self.setWindowTitle("Справка и помощь")
+        self.setWindowTitle(tr("title_hlp"))
         self.resize(400, 350)
 
         layout = QVBoxLayout() #Это делает так, что б все кнопочки были вертикально созданы (как основные наши кнопки)
 
-        self.btn_q1 = QPushButton("Как создать заметку?")
+        self.btn_q1 = QPushButton(tr("help_q1"))
         self.btn_q1.clicked.connect(self.q1_r)
         layout.addWidget(self.btn_q1)
-        self.btn_q2 = QPushButton("Как открыть или отредактировать заметку?")
+        self.btn_q2 = QPushButton(tr("help_q2"))
         self.btn_q2.clicked.connect(self.q2_r)
         layout.addWidget(self.btn_q2)
-        self.btn_q3 = QPushButton("Как вставить изображение в заметку?")
+        self.btn_q3 = QPushButton(tr("help_q3"))
         self.btn_q3.clicked.connect(self.q3_r)
         layout.addWidget(self.btn_q3)
-        self.btn_q4 = QPushButton("Как удалить изображение?")
-        self.btn_q4.clicked.connect(self.q4_r)
-        layout.addWidget(self.btn_q4)
-
-
-        self.btn_q1 = QPushButton("Как создать заметку?")
-        self.btn_q1.clicked.connect(self.q1_r)
-        layout.addWidget(self.btn_q1)
-        self.btn_q2 = QPushButton("Как открыть или отредактировать заметку?")
-        self.btn_q2.clicked.connect(self.q2_r)
-        layout.addWidget(self.btn_q2)
-        self.btn_q3 = QPushButton("Как вставить изображение в заметку?")
-        self.btn_q3.clicked.connect(self.q3_r)
-        layout.addWidget(self.btn_q3)
-        self.btn_q4 = QPushButton("Как удалить изображение?")
+        self.btn_q4 = QPushButton(tr("help_q4"))
         self.btn_q4.clicked.connect(self.q4_r)
         layout.addWidget(self.btn_q4)
 
         layout.addStretch()
-        self.btn_close = QPushButton("Закрыть")
+        self.btn_close = QPushButton(tr("btn_close"))
         self.btn_close.clicked.connect(self.close) #Закрытие окна по нажатию кнопки
         layout.addWidget(self.btn_close)
 
@@ -525,58 +556,13 @@ class HelpWindow(QWidget):
         self.setLayout(layout)
 
     def q1_r(self):
-        text = ( """
-            1. Нажмите «Новая заметка».<br>
-            2. Введите уникальное имя заметки.<br>
-            3. Придумайте и введите пароль — он будет нужен для доступа. """
-        )
-        QMessageBox.information(self, "Как создать заметку?", text)
+        QMessageBox.information(self, tr("help_q1"), tr(f"help_r1"))
     def q2_r(self):
-        text = ( """
-            1. Дважды кликните по имени заметки в списке.
-            2. Введите пароль.
-            3. При неверном пароле появится ошибка. """
-        )
-        QMessageBox.information(self, "Как открыть или отредактировать заметку?", text)
+        QMessageBox.information(self, tr("help_q2"), tr(f"help_r2"))
     def q3_r(self):
-        text = ( """
-            1. Откройте/создайте заметку.<br>
-            2. Нажмите «Прикрепить изображение» и выберите файл.<br>
-            3. Изображение вставится в текст в позиции курсора. """
-        )
-        QMessageBox.information(self, "Как вставить изображение в заметку?", text)
+        QMessageBox.information(self, tr("help_q3"), tr(f"help_r3"))
     def q4_r(self):
-        text = ( """
-            Выделите картинку в тексте и нажмите Delete / Backspace. """
-        )
-        QMessageBox.information(self, "Как удалить изображение?", text)
-
-    def q1_r(self):
-        text = ( """
-            1. Нажмите «Новая заметка».<br>
-            2. Введите уникальное имя заметки.<br>
-            3. Придумайте и введите пароль — он будет нужен для доступа. """
-        )
-        QMessageBox.information(self, "Как создать заметку?", text)
-    def q2_r(self):
-        text = ( """
-            1. Дважды кликните по имени заметки в списке.
-            2. Введите пароль.
-            3. При неверном пароле появится ошибка. """
-        )
-        QMessageBox.information(self, "Как открыть или отредактировать заметку?", text)
-    def q3_r(self):
-        text = ( """
-            1. Откройте/создайте заметку.<br>
-            2. Нажмите «Прикрепить изображение» и выберите файл.<br>
-            3. Изображение вставится в текст в позиции курсора. """
-        )
-        QMessageBox.information(self, "Как вставить изображение в заметку?", text)
-    def q4_r(self):
-        text = ( """
-            Выделите картинку в тексте и нажмите Delete / Backspace. """
-        )
-        QMessageBox.information(self, "Как удалить изображение?", text)
+        QMessageBox.information(self, tr("help_q4"), tr(f"help_r4"))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -584,7 +570,7 @@ if __name__ == "__main__":
         with open("style.qss", "r", encoding="utf-8") as f:
             app.setStyleSheet(f.read())
     except FileNotFoundError:
-        print("Файл стилей не найден")
+        print(tr("err_stl"))
     win = NotesApp()
     win.show()
     sys.exit(app.exec_())

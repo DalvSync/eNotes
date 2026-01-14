@@ -26,6 +26,7 @@ QPushButton:disabled { /* Это позволяет выделить неакт�
 	color: #777777;
 	border: 1px solid #00cc7e;
 }
-#bar {
+QGroupBox {
     background-color: #121212;
+	border: 1px solid #00cc7e;
 }
