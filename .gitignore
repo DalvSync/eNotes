@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 .notes/
+.dist/
+.build/
+./build_env
