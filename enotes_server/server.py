@@ -6,13 +6,11 @@ import datetime
 
 app = FastAPI(title="DalvID Cloud API")
 
-# 20 МБ у байтах
 DEFAULT_QUOTA_BYTES = 20 * 1024 * 1024 
 
 def init_db():
     conn = sqlite3.connect("cloud_notes.db")
     c = conn.cursor()
-    # ДОДАНО: max_storage_bytes
     c.execute(f'''CREATE TABLE IF NOT EXISTS users 
                  (id INTEGER PRIMARY KEY, username TEXT UNIQUE, auth_hash TEXT, max_storage_bytes INTEGER DEFAULT {DEFAULT_QUOTA_BYTES})''')
     c.execute('''CREATE TABLE IF NOT EXISTS notes 
@@ -44,7 +42,6 @@ def register(data: AuthModel):
     conn = sqlite3.connect("cloud_notes.db")
     c = conn.cursor()
     try:
-        # При реєстрації юзер автоматично отримує 20 МБ
         c.execute("INSERT INTO users (username, auth_hash) VALUES (?, ?)", (data.username, data.auth_hash))
         conn.commit()
     except sqlite3.IntegrityError:
@@ -68,7 +65,6 @@ def list_notes(user_id: int = Depends(get_current_user)):
     conn = sqlite3.connect("cloud_notes.db")
     c = conn.cursor()
     
-    # Дістаємо персональний ліміт юзера
     max_bytes = c.execute("SELECT max_storage_bytes FROM users WHERE id=?", (user_id,)).fetchone()[0]
     notes = c.execute("SELECT title, updated_at, LENGTH(payload) FROM notes WHERE user_id=?", (user_id,)).fetchall()
     
@@ -78,17 +74,16 @@ def list_notes(user_id: int = Depends(get_current_user)):
     return {
         "notes": [{"title": n[0], "updated_at": n[1], "size": n[2]} for n in notes],
         "total_bytes": total_bytes,
-        "max_bytes": max_bytes # ВІДДАЄМО ЛІМІТ КЛІЄНТУ!
+        "max_bytes": max_bytes
     }
 
 @app.post("/notes")
 def upload_note(note: NoteModel, user_id: int = Depends(get_current_user)):
     conn = sqlite3.connect("cloud_notes.db")
     c = conn.cursor()
-    
-    # --- БЕЗПЕКА: ПЕРЕВІРКА КВОТИ НА СЕРВЕРІ ---
+
     max_bytes = c.execute("SELECT max_storage_bytes FROM users WHERE id=?", (user_id,)).fetchone()[0]
-    # Рахуємо розмір усіх нотаток, ОКРІМ тієї, яку ми зараз оновлюємо
+    
     current_usage = c.execute("SELECT SUM(LENGTH(payload)) FROM notes WHERE user_id=? AND title != ?", (user_id, note.title)).fetchone()[0] or 0
     new_payload_size = len(note.payload_b64)
     

@@ -1,0 +1,27 @@
+Copyright (c) 2026:
+- eNotes (client application) and Server Code: DalvSync, IDgB00M
+- Website and DalvID Brand/System: DalvSync
+
+This license defines different levels of access and usage rights for various parts of this repository.
+
+eNotes APPLICATION AND SERVER CODE (OPEN SOURCE WITH RESTRICTIONS)
+--------------------------------------------------------------------
+Permission is hereby granted to any person obtaining a copy of the client application code and server files (the "Software") to use, copy, modify, merge, and distribute the Software code, subject to the following mandatory conditions:
+
+1. Attribution: All copies, forks, or substantial portions of the Software must clearly and prominently state that the original developers of the code are DalvSync and IDgB00M, and the original product is "eNotes".
+2. Name Protection: You MAY use and modify the code, but you are STRICTLY FORBIDDEN from using the name "eNotes" for your final (modified) product or fork. You must create your own unique name.
+3. Inclusion: This license agreement must be included in all copies or substantial portions of the Software.
+
+DalvID BRAND AND SYSTEM (STRICTLY RESTRICTED)
+--------------------------------------------------------------------
+The name "DalvID", the brand concept, the identification system architecture, and related logos are the exclusive property of DalvSync. 
+This license DOES NOT grant any rights to use the brand, name, or concept of the "DalvID" system in your own or derivative projects. Any use of this name is possible only with the prior written consent of the author.
+
+WEBSITE (ALL RIGHTS RESERVED)
+--------------------------------------------------------------------
+All source code, design, texts, graphics, and other materials related to the project's website belong exclusively to DalvSync. 
+All rights reserved. You may not copy, modify, distribute, host on other domains, or use the website files for any purpose without the prior written consent of the owner.
+
+DISCLAIMER OF WARRANTY
+--------------------------------------------------------------------
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

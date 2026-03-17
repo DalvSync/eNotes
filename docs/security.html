@@ -4,18 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eNotes | DalvID</title>
+    <link rel="icon" href="enot-logo.png" type="image/png">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="lang-uk">
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.html" class="logo">e<span>Notes</span></a>
+            <button class="mobile-menu-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <div class="nav-right">
-                <ul class="nav-links">
-                    <li><a href="index.html" lang="uk">Головна</a><a href="index.html" lang="en">Home</a></li>
-                    <li><a href="security.html" class="active" lang="uk">DalvID & Безпека</a><a href="security.html" class="active" lang="en">DalvID & Security</a></li>
-                    <li><a href="creators.html" lang="uk">Команда</a><a href="creators.html" lang="en">Team</a></li>
-                </ul>
                 <label class="lang-switch">
                     <input type="checkbox" id="lang-toggle">
                     <div class="lang-slider"></div>
@@ -23,6 +24,19 @@
                         <span class="lbl-uk">UK</span>
                         <span class="lbl-en">EN</span>
                     </div>
+                </label>
+
+                <button class="menu-btn" id="menu-btn" aria-label="Menu">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                </button>
+
+                <ul class="nav-links" id="nav-menu">
+                    <li><a href="index.html" lang="uk">Головна</a><a href="index.html" lang="en">Home</a></li>
+                    <li><a href="security.html" lang="uk">DalvID & Безпека</a><a href="security.html" lang="en">DalvID & Security</a></li>
+                    <li><a href="creators.html" lang="uk">Команда</a><a href="creators.html" lang="en">Team</a></li>
+                </ul>
+            </div>
                 </label>
             </div>
         </div>

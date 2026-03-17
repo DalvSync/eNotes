@@ -1,6 +1,10 @@
 __pycache__/
 *.pyc
-.notes/
-.dist/
-.build/
-./build_env
+notes/
+dist/
+build/
+build_env/
+settings.json
+*.co
+*.dll
+*.exe

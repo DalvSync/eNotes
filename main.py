@@ -18,7 +18,7 @@ from storage import list_notes, save_note, load_note, NOTES_DIR
 from crypto import get_auth_hash
 
 CURRENT_VERSION = "2.0"
-SERVER_URL = "https://DalvDync.pythonanywhere.com:8000"
+SERVER_URL = "https://DalvDync.pythonanywhere.com"
 
 CLOUD_USER = None
 CLOUD_HASH = None

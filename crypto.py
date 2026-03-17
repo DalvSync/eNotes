@@ -1,6 +1,7 @@
 import sys
 import os
 import ctypes
+import hashlib
 
 def resource_path(relative_path):
     """ Отримує абсолютний шлях до ресурсів у скомпільованому файлі або локально """
